@@ -166,41 +166,28 @@ Both architectures produce identical output values after latency alignment.
 
 ## How to Run
 
-### Compile
+### Compile & Simulate
 
+Since this project contains two different architectures for the FIR filter, you need to use macro definitions (`+define+`) to select which version to compile and simulate.
+
+**Option 1: Combinational Version (No Pipeline)**
 ```bash
-vlog fir_filter.v tb_fir_filter.v
-```
+# Compile
+vlog +define+DUT_COMB fir_filter_comb.v fir_filter_tb.v
 
-### Simulate
-
-```bash
-vsim tb_fir_filter
+# Simulate
+vsim work.tb_fir_filter
 run -all
-```
 
-### Verification
+# Important: If you are currently running a simulation, quit it first
+quit -sim
 
-Compare:
+# Compile
+vlog +define+DUT_PIPELINED fir_filter_pipelined.v fir_filter_tb.v
 
-```text
-sim_output_comb.txt
-```
-
-or
-
-```text
-sim_output_pipelined.txt
-```
-
-against
-
-```text
-expected_output.txt
-```
-
----
-
+# Simulate
+vsim work.tb_fir_filter
+run -all
 ## Tools
 
 - Verilog HDL
