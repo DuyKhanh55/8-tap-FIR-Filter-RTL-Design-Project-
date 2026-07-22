@@ -137,7 +137,7 @@ PASS
 
 ### V1 – Combinational FIR
 
-![Waveform V1](images/waveformv1.png)
+![Waveform V1](images/waveform1.png)
 
 ### V2 – Pipelined FIR
 
