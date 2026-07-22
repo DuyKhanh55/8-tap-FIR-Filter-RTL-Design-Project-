@@ -132,8 +132,3 @@ Pipeline latency:
 
 **Phan Duy Khanh**
 
-Electronics and Telecommunications Engineering  
-University of Science – VNUHCM
-
-GitHub: https://github.com/your-github
-LinkedIn: https://linkedin.com/in/your-linkedin
