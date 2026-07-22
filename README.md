@@ -2,13 +2,18 @@
 
 An 8-tap low-pass FIR filter implemented in Verilog and verified against a MATLAB golden reference model.
 
+---
+
 ## Highlights
 
 - Designed an 8-tap FIR filter using Verilog RTL.
+- Implemented two architectures:
+  - V1: Combinational MAC
+  - V2: 4-Stage Pipelined MAC
 - Generated Q1.15 coefficients in MATLAB.
-- Verified RTL output against a MATLAB reference model.
-- Applied a 4-stage pipeline to the MAC datapath, improving Fmax from **33.08 MHz** to **262.12 MHz** (**~7.9× speedup**).
-- Synthesized on an Intel Cyclone V FPGA using Quartus Prime.
+- Verified RTL outputs against MATLAB reference results.
+- Improved maximum operating frequency from **33.08 MHz** to **262.12 MHz** (~7.9× speedup).
+- Synthesized using Intel Quartus Prime targeting Cyclone V FPGA.
 
 ---
 
@@ -16,11 +21,12 @@ An 8-tap low-pass FIR filter implemented in Verilog and verified against a MATLA
 
 | Item | Value |
 |--------|--------|
-| Filter Type | 8-Tap Low-Pass FIR |
+| Filter Type | Low-Pass FIR |
+| Number of Taps | 8 |
 | Architecture | Direct Form |
 | Input Width | 16-bit |
 | Output Width | 32-bit |
-| Coefficient Format | Q1.15 |
+| Coefficient Format | Q1.15 Fixed-Point |
 | Sample Rate | 48 kHz |
 | Cutoff Frequency | 6 kHz |
 
@@ -28,12 +34,18 @@ An 8-tap low-pass FIR filter implemented in Verilog and verified against a MATLA
 
 ## Design Evolution
 
-| Version | Description | Fmax |
+| Version | Architecture | Fmax |
 |----------|----------|----------|
 | V1 | Combinational MAC | 33.08 MHz |
 | V2 | 4-Stage Pipelined MAC | 262.12 MHz |
 
-Pipeline optimization reduced the critical path and increased operating frequency by approximately **7.9×**, while maintaining a throughput of **1 sample per clock cycle**.
+**Performance Improvement**
+
+\[
+Speedup = \frac{262.12}{33.08} \approx 7.9\times
+\]
+
+Pipeline registers reduce the critical path while maintaining a throughput of one output sample per clock cycle.
 
 ---
 
@@ -42,6 +54,7 @@ Pipeline optimization reduced the critical path and increased operating frequenc
 ```text
 MATLAB
    │
+   ├── coefficients.txt
    ├── input_samples.txt
    ├── expected_output.txt
    │
@@ -49,12 +62,13 @@ MATLAB
 Verilog RTL
    │
    ▼
-ModelSim
+ModelSim Simulation
    │
-   └── sim_output.txt
+   ├── sim_output_comb.txt
+   └── sim_output_pipelined.txt
    │
    ▼
-Comparison
+Output Comparison
    │
    ▼
 PASS
@@ -65,7 +79,7 @@ PASS
 ## Project Structure
 
 ```text
-fir-rtl-filter/
+8-tap-FIR-Filter-RTL-Design-Project/
 │
 ├── README.md
 │
@@ -77,36 +91,113 @@ fir-rtl-filter/
 │       └── fir_filter.v
 │
 ├── tb/
-│   └── tb_fir_filter.v
+│   └── fir_filter_tb.v
 │
 ├── matlab/
 │   └── fir_design.m
 │
+├── test_vectors/
+│   ├── coefficients.txt
+│   ├── input_samples.txt
+│   └── expected_output.txt
+│
 ├── sim_results/
 │   ├── v1/
+│   │   ├── expected_output.txt
+│   │   └── sim_output_comb.txt
+│   │
 │   └── v2/
+│       ├── expected_output.txt
+│       └── sim_output_pipelined.txt
 │
-└── synthesis_reports/
-    ├── v1_timing_summary.txt
-    └── v2_timing_summary.txt
+└── images/
+    ├── matlab_impulse_response.png
+    ├── matlab_freq_response.png
+    ├── waveformv1.png
+    ├── waveformpipelined.png
+    ├── timing1.png
+    └── timing2.png
 ```
+
+---
+
+## MATLAB Results
+
+### Impulse Response
+
+![Impulse Response](images/matlab_impulse_response.png)
+
+### Frequency Response
+
+![Frequency Response](images/matlab_freq_response.png)
+
+---
+
+## Simulation Results
+
+### V1 – Combinational FIR
+
+![Waveform V1](images/waveformv1.png)
+
+### V2 – Pipelined FIR
+
+![Waveform V2](images/waveformpipelined.png)
+
+Both architectures produce identical output values after latency alignment.
+
+---
+
+## Timing Analysis
+
+### V1 Timing Report
+
+![Timing V1](images/timing1.png)
+
+### V2 Timing Report
+
+![Timing V2](images/timing2.png)
+
+| Version | Fmax |
+|----------|----------|
+| V1 | 33.08 MHz |
+| V2 | 262.12 MHz |
 
 ---
 
 ## How to Run
 
+### Compile
+
 ```bash
 vlog fir_filter.v tb_fir_filter.v
+```
+
+### Simulate
+
+```bash
 vsim tb_fir_filter
 run -all
 ```
 
-Compare `sim_output.txt` against `expected_output.txt`.
+### Verification
 
-Pipeline latency:
+Compare:
 
-- V1: 1 cycle
-- V2: 4 cycles
+```text
+sim_output_comb.txt
+```
+
+or
+
+```text
+sim_output_pipelined.txt
+```
+
+against
+
+```text
+expected_output.txt
+```
 
 ---
 
@@ -121,10 +212,12 @@ Pipeline latency:
 
 ## Key Learnings
 
-- Identified the combinational MAC as the Fmax-limiting critical path through Quartus timing analysis.
-- Traded 3 cycles of latency for a **7.9× increase in maximum operating frequency**, while maintaining throughput.
-- Verified functionality against an independent MATLAB golden model rather than relying solely on waveform inspection.
-- Applied a common RTL timing-closure technique used in FPGA and ASIC datapath design: **pipelining**.
+- FIR filter implementation using fixed-point arithmetic.
+- Q1.15 coefficient quantization.
+- RTL verification using MATLAB golden reference.
+- Timing optimization through pipelining.
+- FPGA timing analysis and critical path reduction.
+- Throughput-latency tradeoff in digital signal processing hardware.
 
 ---
 
@@ -132,3 +225,5 @@ Pipeline latency:
 
 **Phan Duy Khanh**
 
+Electronics & Telecommunications Engineering  
+University of Science - VNUHCM
