@@ -208,9 +208,4 @@ run -all
 
 ---
 
-## Author
 
-**Phan Duy Khanh**
-
-Electronics & Telecommunications Engineering  
-University of Science - VNUHCM
